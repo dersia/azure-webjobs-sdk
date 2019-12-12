@@ -57,20 +57,6 @@ namespace Microsoft.Azure.WebJobs.Host.Bindings
             return systemBindingData;
         }
 
-        // Validate that a template only uses static (non-instance) binding variables. 
-        // Enforces we're not referring to other data from the trigger. 
-        internal static void ValidateStaticContract(BindingTemplate template)
-        {            
-            try
-            {
-                template.ValidateContractCompatibility(SystemBindingData.DefaultSystemContract);
-            }
-            catch (InvalidOperationException e)
-            {
-                throw new InvalidOperationException($"Default contract can only refer to the '{SystemBindingData.Name}' binding data: " + e.Message);
-            }
-        }
-
         internal void AddToBindingData(Dictionary<string, object> bindingData)
         {
             // User data takes precedence, so if 'sys' already exists, add via the internal name. 

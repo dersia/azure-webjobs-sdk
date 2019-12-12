@@ -350,7 +350,7 @@ namespace Microsoft.Azure.WebJobs.Host.FunctionalTests
             }
         }
 
-        [Fact]
+        [Fact(Skip = "Binding Expression not check to allow runtime-binding")]
         public void Fails_BindingContract_Mismatch()
         {
             // Verify that indexing fails if the [Queue] trigger needs binding data that's not present. 

@@ -16,22 +16,6 @@ namespace Microsoft.Azure.WebJobs.Host.Bindings
     public static class BindingTemplateExtensions
     {
         /// <summary>
-        /// Verifies that the specified binding contract contains contract members for each of the
-        /// parameters in the specified <see cref="BindingTemplate"/>.
-        /// </summary>
-        /// <param name="bindingTemplate">The binding template to validate.</param>
-        /// <param name="bindingDataContract">The data contract to validate against.</param>
-        public static void ValidateContractCompatibility(this BindingTemplate bindingTemplate, IReadOnlyDictionary<string, Type> bindingDataContract)
-        {
-            if (bindingTemplate == null)
-            {
-                throw new ArgumentNullException("bindingTemplate");
-            }
-
-            ValidateContractCompatibility(bindingTemplate.ParameterNames, bindingDataContract);
-        }
-
-        /// <summary>
         /// Bind the <see cref="BindingTemplate"/> using the specified binding data.
         /// </summary>
         /// <param name="bindingTemplate">The binding template to validate.</param>
@@ -46,29 +30,6 @@ namespace Microsoft.Azure.WebJobs.Host.Bindings
             }
 
             return bindingTemplate.Bind(bindingData);
-        }
-
-        public static void ValidateContractCompatibility(IEnumerable<string> parameterNames, IReadOnlyDictionary<string, Type> bindingDataContract)
-        {
-            if (parameterNames != null && bindingDataContract != null)
-            {
-                foreach (string parameterName in parameterNames)
-                {
-                    if (string.Equals(parameterName, SystemBindingData.Name, StringComparison.OrdinalIgnoreCase))
-                    {
-                        continue;
-                    }
-                    if (BindingParameterResolver.IsSystemParameter(parameterName))
-                    {
-                        continue;
-                    }
-
-                    if (!bindingDataContract.ContainsKey(parameterName))
-                    {
-                        throw new InvalidOperationException(string.Format(CultureInfo.CurrentCulture, Resource.UnableToResolveBindingParameterFormat, parameterName));
-                    }
-                }
-            }
         }
     }
 }

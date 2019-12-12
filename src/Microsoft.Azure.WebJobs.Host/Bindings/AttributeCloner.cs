@@ -234,8 +234,6 @@ namespace Microsoft.Azure.WebJobs.Host.Bindings
                 validator(originalValue);
             }
 
-            SystemBindingData.ValidateStaticContract(template);
-
             // For static default contracts, we only have access to the built in binding data. 
             return (newAttr, bindingData) =>
             {
@@ -258,7 +256,6 @@ namespace Microsoft.Azure.WebJobs.Host.Bindings
             }
 
             IResolutionPolicy policy = GetPolicy(attr.ResolutionPolicyType, propInfo);
-            template.ValidateContractCompatibility(contract);
             return (newAttr, bindingData) => TemplateBind(policy, propInfo, newAttr, template, bindingData, validator);
         }
 

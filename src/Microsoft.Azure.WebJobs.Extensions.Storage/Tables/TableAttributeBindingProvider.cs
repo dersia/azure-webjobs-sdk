@@ -64,7 +64,6 @@ namespace Microsoft.Azure.WebJobs.Host.Tables
                 string partitionKey = Resolve(tableAttribute.PartitionKey);
                 string rowKey = Resolve(tableAttribute.RowKey);
                 IBindableTableEntityPath path = BindableTableEntityPath.Create(tableName, partitionKey, rowKey);
-                path.ValidateContractCompatibility(context.BindingDataContract);
 
                 IArgumentBinding<TableEntityContext> argumentBinding = _entityBindingProvider.TryCreate(parameter);
 

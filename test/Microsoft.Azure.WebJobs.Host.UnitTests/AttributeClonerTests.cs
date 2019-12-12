@@ -194,7 +194,7 @@ namespace Microsoft.Azure.WebJobs.Host.UnitTests
         private static readonly IConfiguration _emptyConfig = new ConfigurationBuilder().Build();
 
         // Enforce binding contracts statically.
-        [Fact]
+        [Fact(Skip = "Binding Expression not check to allow runtime-binding")]
         public void BindingContractMismatch()
         {
             Attr1 a1 = new Attr1 { Path = "{name}" };
@@ -554,7 +554,7 @@ namespace Microsoft.Azure.WebJobs.Host.UnitTests
         }
 
         // Default can't access instance binding data. 
-        [Fact]
+        [Fact(Skip = "Binding Expression not check to allow runtime-binding")]
         public void DefaultCantAccessInstanceData()
         {
             var attr = new BadDefaultAttr(); // use default value, which is bad. 
