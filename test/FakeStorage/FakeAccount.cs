@@ -1,10 +1,10 @@
 ﻿// Copyright (c) .NET Foundation. All rights reserved.
 // Licensed under the MIT License. See License.txt in the project root for license information.
 
-using Microsoft.WindowsAzure.Storage.Auth;
-using Microsoft.WindowsAzure.Storage.Blob;
-using Microsoft.WindowsAzure.Storage.Queue;
-using Microsoft.WindowsAzure.Storage.Table;
+using Microsoft.Azure.Storage.Auth;
+using Microsoft.Azure.Storage.Blob;
+using Microsoft.Azure.Storage.Queue;
+using Microsoft.Azure.Cosmos.Table;
 using System;
 using System.Collections.Generic;
 using System.Threading;
@@ -14,13 +14,22 @@ namespace FakeStorage
 {
     public class FakeAccount
     {
-        internal StorageCredentials _creds = new StorageCredentials("fakeaccount", "key1");
+        internal readonly string _accountName = "fakeaccount";
+        internal readonly string _accountKey = "key1";
+        internal Microsoft.Azure.Storage.Auth.StorageCredentials _creds;
+        internal Microsoft.Azure.Cosmos.Table.StorageCredentials _tableCreds;
 
         internal readonly MemoryBlobStore _blobStore = new MemoryBlobStore();
         internal readonly MemoryTableStore Store = new MemoryTableStore();
         internal readonly MemoryQueueStore _queueStore = new MemoryQueueStore();
 
-        public string Name => _creds.AccountName;
+        public string Name => _accountName;
+
+        public FakeAccount()
+        {
+            _creds = new Microsoft.Azure.Storage.Auth.StorageCredentials(_accountName, _accountKey);
+            _tableCreds = new Microsoft.Azure.Cosmos.Table.StorageCredentials(_accountName, _accountKey);
+        }
 
         public CloudQueueClient CreateCloudQueueClient()
         {

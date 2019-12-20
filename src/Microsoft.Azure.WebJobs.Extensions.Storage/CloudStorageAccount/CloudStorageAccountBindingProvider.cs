@@ -4,7 +4,7 @@
 using System;
 using System.Reflection;
 using System.Threading.Tasks;
-using Microsoft.WindowsAzure.Storage;
+using Microsoft.Azure.Storage;
 
 namespace Microsoft.Azure.WebJobs.Host.Bindings.StorageAccount
 {
@@ -21,6 +21,8 @@ namespace Microsoft.Azure.WebJobs.Host.Bindings.StorageAccount
         {
             ParameterInfo parameter = context.Parameter;
 
+            
+            
             if (parameter.ParameterType != typeof(CloudStorageAccount))
             {
                 return Task.FromResult<IBinding>(null);
@@ -28,7 +30,6 @@ namespace Microsoft.Azure.WebJobs.Host.Bindings.StorageAccount
 
             var accountAttribute = TypeUtility.GetHierarchicalAttributeOrNull<StorageAccountAttribute>(parameter);
             var account = _accountProvider.Get(accountAttribute?.Account);
-
             var binding = new CloudStorageAccountBinding(parameter.Name, account.SdkObject);
             return Task.FromResult<IBinding>(binding);
         }

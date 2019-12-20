@@ -7,8 +7,8 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Azure.WebJobs.Host.Bindings;
 using Microsoft.Azure.WebJobs.Host.Blobs;
-using Microsoft.WindowsAzure.Storage.Blob;
-using Microsoft.WindowsAzure.Storage.Table;
+using Microsoft.Azure.Storage.Blob;
+using Microsoft.Azure.Cosmos.Table;
 
 
 namespace Microsoft.Azure.WebJobs
@@ -78,7 +78,7 @@ namespace Microsoft.Azure.WebJobs
             return sdkOperation;
         }
 
-        public static Task<IList<TableResult>> ExecuteBatchAsync(this CloudTable sdk, TableBatchOperation batch,
+        public static Task<TableBatchResult> ExecuteBatchAsync(this CloudTable sdk, TableBatchOperation batch,
     CancellationToken cancellationToken)
         {
             return sdk.ExecuteBatchAsync(batch, requestOptions: null, operationContext: null, cancellationToken: cancellationToken);

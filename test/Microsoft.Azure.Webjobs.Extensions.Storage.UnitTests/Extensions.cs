@@ -8,9 +8,10 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.WindowsAzure.Storage.Blob;
-using Microsoft.WindowsAzure.Storage.Queue;
-using Microsoft.WindowsAzure.Storage.Table;
+using Microsoft.Azure.Storage.Blob;
+using Microsoft.Azure.Storage.Queue;
+using Microsoft.Azure.Cosmos.Table;
+using System.Reflection;
 
 namespace Microsoft.Azure.WebJobs
 {
@@ -124,6 +125,26 @@ namespace Microsoft.Azure.WebJobs
             var operation = table.CreateRetrieveOperation<TElement>(partitionKey, rowKey);
             TableResult result = table.ExecuteAsync(operation, CancellationToken.None).GetAwaiter().GetResult();
             return (TElement)result.Result;
+        }
+
+        public static T SetInternalProperty<T>(this T obj, string name, object value)
+        {
+            var t = obj.GetType();
+
+            var prop = t.GetProperty(name,
+              BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public);
+
+            // Reflection has a quirk.  While a property is inherited, the setter may not be. 
+            // Need to request the property on the type it was declared. 
+            while (!prop.CanWrite)
+            {
+                t = t.BaseType;
+                prop = t.GetProperty(name,
+                    BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public);
+            }
+
+            prop.SetValue(obj, value);
+            return obj;
         }
     }
 }

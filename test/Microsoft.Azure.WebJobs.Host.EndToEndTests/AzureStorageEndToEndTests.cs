@@ -11,10 +11,10 @@ using Microsoft.Azure.WebJobs.Host.Queues;
 using Microsoft.Azure.WebJobs.Host.TestCommon;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.WindowsAzure.Storage;
-using Microsoft.WindowsAzure.Storage.Blob;
-using Microsoft.WindowsAzure.Storage.Queue;
-using Microsoft.WindowsAzure.Storage.Table;
+using Microsoft.Azure.Storage;
+using Microsoft.Azure.Storage.Blob;
+using Microsoft.Azure.Storage.Queue;
+using Microsoft.Azure.Cosmos.Table;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Xunit;
@@ -45,7 +45,8 @@ namespace Microsoft.Azure.WebJobs.Host.EndToEndTests
 
         private static EventWaitHandle _startWaitHandle;
         private static EventWaitHandle _functionChainWaitHandle;
-        private CloudStorageAccount _storageAccount;
+        private Storage.CloudStorageAccount _storageAccount;
+        private Cosmos.Table.CloudStorageAccount _storageTableAccount;
         private RandomNameResolver _resolver;
         private static object testResult;
 
@@ -55,6 +56,7 @@ namespace Microsoft.Azure.WebJobs.Host.EndToEndTests
         public AzureStorageEndToEndTests(TestFixture fixture)
         {
             _storageAccount = fixture.StorageAccount;
+            _storageTableAccount = fixture.StorageTableAccount;
         }
 
         /// <summary>
@@ -220,7 +222,7 @@ namespace Microsoft.Azure.WebJobs.Host.EndToEndTests
 
             // write test entities
             string testTableName = _resolver.ResolveInString(TableName);
-            CloudTableClient tableClient = _storageAccount.CreateCloudTableClient();
+            CloudTableClient tableClient = _storageTableAccount.CreateCloudTableClient();
             CloudTable table = tableClient.GetTableReference(testTableName);
             await table.CreateIfNotExistsAsync();
             var operation = new TableBatchOperation();
@@ -363,9 +365,7 @@ namespace Microsoft.Azure.WebJobs.Host.EndToEndTests
             // - use a GUID as the content, which is not a valid base64 string
             // - pass 'true', to indicate that it is a base64 string
             string messageContent = Guid.NewGuid().ToString();
-            object[] parameters = new object[] { messageContent, true };
-            CloudQueueMessage message = Activator.CreateInstance(typeof(CloudQueueMessage),
-                BindingFlags.Instance | BindingFlags.NonPublic, null, parameters, null) as CloudQueueMessage;
+            CloudQueueMessage message = new CloudQueueMessage(messageContent, true);
 
             var queueClient = _storageAccount.CreateCloudQueueClient();
             var queue = queueClient.GetQueueReference(_resolver.ResolveInString(BadMessageQueue1));
@@ -396,7 +396,7 @@ namespace Microsoft.Azure.WebJobs.Host.EndToEndTests
                         // The message is in the second queue
                         var queue2 = queueClient.GetQueueReference(_resolver.ResolveInString(BadMessageQueue2));
 
-                        StorageException ex = await Assert.ThrowsAsync<StorageException>(
+                        Storage.StorageException ex = await Assert.ThrowsAsync<Storage.StorageException>(
                             () => queue2.DeleteMessageAsync(_lastMessageId, _lastMessagePopReceipt));
                         Assert.Equal("MessageNotFound", ex.RequestInformation.ExtendedErrorInformation.ErrorCode);
                     }
@@ -458,7 +458,7 @@ namespace Microsoft.Azure.WebJobs.Host.EndToEndTests
         {
             string testTableName = _resolver.ResolveInString(TableName);
 
-            CloudTableClient tableClient = _storageAccount.CreateCloudTableClient();
+            CloudTableClient tableClient = _storageTableAccount.CreateCloudTableClient();
             CloudTable table = tableClient.GetTableReference(testTableName);
 
             Assert.True(await table.ExistsAsync(), "Result table not found");
@@ -542,9 +542,16 @@ namespace Microsoft.Azure.WebJobs.Host.EndToEndTests
 
                 var provider = host.Services.GetService<StorageAccountProvider>();
                 StorageAccount = provider.GetHost().SdkObject;
+                StorageTableAccount = provider.GetHost().SdkTableObject;
             }
 
-            public CloudStorageAccount StorageAccount
+            public Storage.CloudStorageAccount StorageAccount
+            {
+                get;
+                private set;
+            }
+
+            public Cosmos.Table.CloudStorageAccount StorageTableAccount
             {
                 get;
                 private set;
@@ -564,7 +571,7 @@ namespace Microsoft.Azure.WebJobs.Host.EndToEndTests
                     testQueue.DeleteAsync().Wait();
                 }
 
-                CloudTableClient tableClient = StorageAccount.CreateCloudTableClient();
+                CloudTableClient tableClient = StorageTableAccount.CreateCloudTableClient();
                 foreach (var testTable in tableClient.ListTablesSegmentedAsync(TestArtifactsPrefix, null).Result.Results)
                 {
                     testTable.DeleteAsync().Wait();

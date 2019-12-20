@@ -2,10 +2,10 @@
 // Licensed under the MIT License. See License.txt in the project root for license information.
 
 using Microsoft.Azure.WebJobs.Host;
-using Microsoft.WindowsAzure.Storage;
-using Microsoft.WindowsAzure.Storage.Blob;
-using Microsoft.WindowsAzure.Storage.Queue;
-using Microsoft.WindowsAzure.Storage.Table;
+using Microsoft.Azure.Storage;
+using Microsoft.Azure.Storage.Blob;
+using Microsoft.Azure.Storage.Queue;
+using Microsoft.Azure.Cosmos.Table;
 using System;
 using System.Collections.Generic;
 
@@ -23,17 +23,19 @@ namespace Microsoft.Azure.WebJobs
         /// Get the real azure storage account. Only use this if you explicitly need to bind to the <see cref="CloudStorageAccount"/>, 
         /// else use the virtuals. 
         /// </summary>
-        public CloudStorageAccount SdkObject { get; protected set; }
+        public Storage.CloudStorageAccount SdkObject { get; protected set; }
+        public Cosmos.Table.CloudStorageAccount SdkTableObject { get; protected set; }
 
         public static StorageAccount NewFromConnectionString(string accountConnectionString)
         {
-            var account = CloudStorageAccount.Parse(accountConnectionString);
-            return New(account);
+            var account = Storage.CloudStorageAccount.Parse(accountConnectionString);
+            var tableAccount = Cosmos.Table.CloudStorageAccount.Parse(accountConnectionString);
+            return New(account, tableAccount);
         }
 
-        public static StorageAccount New(CloudStorageAccount account)
+        public static StorageAccount New(Storage.CloudStorageAccount account, Cosmos.Table.CloudStorageAccount tableAccount)
         {
-            return new StorageAccount { SdkObject = account };
+            return new StorageAccount { SdkObject = account, SdkTableObject = tableAccount };
         }
 
         public virtual bool IsDevelopmentStorageAccount()
@@ -63,7 +65,7 @@ namespace Microsoft.Azure.WebJobs
 
         public virtual CloudTableClient CreateCloudTableClient()
         {
-            return SdkObject.CreateCloudTableClient();
+            return SdkTableObject.CreateCloudTableClient();
         }
     }
 }

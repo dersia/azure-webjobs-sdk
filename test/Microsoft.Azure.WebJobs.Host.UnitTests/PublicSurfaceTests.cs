@@ -27,6 +27,14 @@ namespace Microsoft.Azure.WebJobs.Host.UnitTests
                 {
                     Assert.True(false, "Should not have azure dependency: " + name);
                 }
+                if (name.StartsWith("Microsoft.Azure.Storage"))
+                {
+                    Assert.True(false, "Should not have azure dependency: " + name);
+                }
+                if (name.StartsWith("Microsoft.Azure.Cosmos"))
+                {
+                    Assert.True(false, "Should not have azure dependency: " + name);
+                }
             }
         }
 

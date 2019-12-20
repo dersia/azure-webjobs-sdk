@@ -7,8 +7,9 @@ using System.IO;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.WindowsAzure.Storage;
-using Microsoft.WindowsAzure.Storage.Blob;
+using Microsoft.Azure.Storage;
+using Microsoft.Azure.Storage.Blob;
+using Microsoft.Azure.Storage.Core.Util;
 
 namespace FakeStorage
 {
@@ -91,10 +92,14 @@ namespace FakeStorage
             // return base.AcquireLeaseAsync(leaseTime, proposedLeaseId, accessCondition, options, operationContext, cancellationToken);
         }
 
-        public override Task<long> AppendBlockAsync(Stream blockData)
-        {
-            return base.AppendBlockAsync(blockData);
-        }
+        public override Task<long> AppendBlockAsync(Stream blockData, string contentMD5, CancellationToken cancellationToken) 
+            => base.AppendBlockAsync(blockData, contentMD5, cancellationToken);
+
+        public override Task<long> AppendBlockAsync(Stream blockData, string contentMD5, AccessCondition accessCondition, BlobRequestOptions options, OperationContext operationContext, IProgress<StorageProgress> progressHandler, CancellationToken cancellationToken) 
+            => base.AppendBlockAsync(blockData, contentMD5, accessCondition, options, operationContext, progressHandler, cancellationToken);
+
+        public override Task<long> AppendBlockAsync(Uri sourceUri, long offset, long count, string sourceContentMd5, AccessCondition sourceAccessCondition, AccessCondition destAccessCondition, BlobRequestOptions options, OperationContext operationContext, CancellationToken cancellationToken) 
+            => base.AppendBlockAsync(sourceUri, offset, count, sourceContentMd5, sourceAccessCondition, destAccessCondition, options, operationContext, cancellationToken);
 
         public override Task<long> AppendBlockAsync(Stream blockData, string contentMD5)
         {
@@ -652,6 +657,12 @@ namespace FakeStorage
         }
 
         public override Task UploadTextAsync(string content, Encoding encoding, AccessCondition accessCondition, BlobRequestOptions options, OperationContext operationContext, CancellationToken cancellationToken)
+            => base.UploadTextAsync(content, encoding, accessCondition, options, operationContext, cancellationToken);
+
+        public override Task UploadTextAsync(string content, CancellationToken cancellationToken) 
+            => base.UploadTextAsync(content, cancellationToken);
+
+        public override Task UploadTextAsync(string content, Encoding encoding, AccessCondition accessCondition, BlobRequestOptions options, OperationContext operationContext, IProgress<StorageProgress> progressHandler, CancellationToken cancellationToken)
         {
             using (CloudBlobStream stream = _store.OpenWriteAppend(_containerName, _blobName, _metadata))
             {
@@ -660,7 +671,7 @@ namespace FakeStorage
                 stream.CommitAsync().Wait();
             }
 
-            return Task.FromResult(0);
+            return Task.CompletedTask;
         }
     }
 }

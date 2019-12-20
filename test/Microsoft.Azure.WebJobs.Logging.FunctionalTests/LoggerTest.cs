@@ -8,8 +8,8 @@ using System.Reflection;
 using System.Threading.Tasks;
 using Microsoft.Azure.WebJobs.Host.TestCommon;
 using Microsoft.Azure.WebJobs.Logging.Internal;
-using Microsoft.WindowsAzure.Storage;
-using Microsoft.WindowsAzure.Storage.Table;
+using Microsoft.Azure.Storage;
+using Microsoft.Azure.Cosmos.Table;
 using Moq;
 using Xunit;
 
@@ -46,7 +46,7 @@ namespace Microsoft.Azure.WebJobs.Logging.FunctionalTests
                 // handle any exceptions that are due to the table is already being deleted
                 aex.Handle(e =>
                 {
-                    return e is StorageException storageEx &&
+                    return e is Cosmos.Table.StorageException storageEx &&
                            storageEx?.RequestInformation?.ExtendedErrorInformation?.ErrorCode == "TableBeingDeleted";
                 });
             }
@@ -733,10 +733,10 @@ namespace Microsoft.Azure.WebJobs.Logging.FunctionalTests
             mockTable
                 .SetupSequence(t => t.ExecuteBatchAsync(It.IsAny<TableBatchOperation>()))
                 // First background flush
-                .ReturnsAsync(new List<TableResult> { new TableResult() })
+                .ReturnsAsync(new TableBatchResult { new TableResult() })
                 .ThrowsAsync(exToThrow1)
                 // Second background flush
-                .ReturnsAsync(new List<TableResult> { new TableResult() })
+                .ReturnsAsync(new TableBatchResult { new TableResult() })
                 .ThrowsAsync(exToThrow2);
 
             Mock<ILogTableProvider> mockProvider = new Mock<ILogTableProvider>(MockBehavior.Strict);
@@ -902,7 +902,7 @@ namespace Microsoft.Azure.WebJobs.Logging.FunctionalTests
                     Assert.True(false, "Environment var " + storageString + " is not set. Should be set to an azure storage account connection string to use for testing.");
                 }
 
-                CloudStorageAccount account = CloudStorageAccount.Parse(acs);
+                Cosmos.Table.CloudStorageAccount account = Cosmos.Table.CloudStorageAccount.Parse(acs);
                 _tableClient = account.CreateCloudTableClient();
             }
             return _tableClient;

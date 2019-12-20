@@ -1,11 +1,12 @@
 ﻿// Copyright (c) .NET Foundation. All rights reserved.
 // Licensed under the MIT License. See License.txt in the project root for license information.
 
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.Azure.WebJobs.Host;
 
-namespace Microsoft.WindowsAzure.Storage.Queue
+namespace Microsoft.Azure.Storage.Queue
 {
     internal static class CloudQueueMessageExtensions
     {
@@ -33,6 +34,11 @@ namespace Microsoft.WindowsAzure.Storage.Queue
             {
                 _popReceiptProp.SetValue(message, popReceipt);
             }
+        }
+
+        public static CloudQueueMessage CreateCloudQueueMessageFromByteArray(byte[] content)
+        {
+            return new CloudQueueMessage(Convert.ToBase64String(content), true);
         }
     }
 }

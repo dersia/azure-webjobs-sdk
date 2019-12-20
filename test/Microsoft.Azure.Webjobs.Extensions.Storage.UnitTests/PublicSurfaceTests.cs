@@ -30,7 +30,11 @@ namespace Microsoft.Azure.WebJobs.Host.UnitTests
                 "Microsoft.Extensions.Hosting.Abstractions",
                 "Microsoft.Extensions.Logging.Abstractions",
                 "Microsoft.Extensions.Options",
-                "Microsoft.WindowsAzure.Storage",
+                "Microsoft.Azure.Storage.Queue",
+                "Microsoft.Azure.Storage.Common",
+                "Microsoft.Azure.Storage.Blob",
+                "Microsoft.Azure.Cosmos.Table",
+                "Microsoft.Azure.Cosmos.Table.Client",
                 "netstandard",
                 "Newtonsoft.Json",
                 "System.ComponentModel.Annotations"

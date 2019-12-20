@@ -9,7 +9,8 @@ using Microsoft.Azure.WebJobs.Host.Triggers;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using Microsoft.WindowsAzure.Storage;
+using Microsoft.Azure.Storage;
+using Microsoft.Azure.Cosmos.Table;
 
 namespace Microsoft.Azure.WebJobs.Host.UnitTests
 {
@@ -24,11 +25,11 @@ namespace Microsoft.Azure.WebJobs.Host.UnitTests
 
             public override StorageAccount Get(string name)
             {
-                return StorageAccount.New(CloudStorageAccount.DevelopmentStorageAccount);
+                return StorageAccount.New(Storage.CloudStorageAccount.DevelopmentStorageAccount, Cosmos.Table.CloudStorageAccount.DevelopmentStorageAccount);
             }
         }
 
-        public static FunctionIndexer Create(CloudStorageAccount account = null, INameResolver nameResolver = null,
+        public static FunctionIndexer Create(Storage.CloudStorageAccount account = null, Cosmos.Table.CloudStorageAccount tableAccount = null, INameResolver nameResolver = null,
             IExtensionRegistry extensionRegistry = null, ILoggerFactory loggerFactory = null)
         {
             IHost host = new HostBuilder()

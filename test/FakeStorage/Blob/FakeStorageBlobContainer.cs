@@ -4,8 +4,8 @@
 using System;
 using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.WindowsAzure.Storage;
-using Microsoft.WindowsAzure.Storage.Blob;
+using Microsoft.Azure.Storage;
+using Microsoft.Azure.Storage.Blob;
 
 namespace FakeStorage
 {
@@ -64,7 +64,7 @@ namespace FakeStorage
         #region GetBlockBlobReference
         public override CloudBlockBlob GetBlockBlobReference(string blobName)
         {
-            return base.GetBlockBlobReference(blobName);
+            return GetBlockBlobReference(blobName, null);
         }
 
         public override CloudBlockBlob GetBlockBlobReference(string blobName, DateTimeOffset? snapshotTime)
@@ -115,10 +115,8 @@ namespace FakeStorage
             throw new NotImplementedException();
         }
 
-        public override Task CreateAsync(BlobRequestOptions options, OperationContext operationContext)
-        {
-            throw new NotImplementedException();
-        }
+        public override Task CreateAsync(CancellationToken cancellationToken) 
+            => throw new NotImplementedException();
 
         public override Task CreateAsync(BlobContainerPublicAccessType accessType, BlobRequestOptions options, OperationContext operationContext)
         {

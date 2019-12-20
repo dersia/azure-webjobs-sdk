@@ -7,6 +7,7 @@ using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Host.Loggers;
 using Microsoft.Azure.WebJobs.Host.Protocols;
 using Microsoft.Extensions.Logging;
+using Microsoft.Azure.Storage.Blob;
 
 namespace WebJobs.Host.Storage.Logging
 {

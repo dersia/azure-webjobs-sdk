@@ -9,8 +9,7 @@ using System.Threading;
 using Microsoft.Azure.WebJobs.Host.Indexers;
 using Microsoft.Azure.WebJobs.Host.Protocols;
 using Microsoft.Azure.WebJobs.Host.TestCommon;
-using Microsoft.WindowsAzure.Storage;
-using Microsoft.WindowsAzure.Storage.Table;
+using Microsoft.Azure.Cosmos.Table;
 using Moq;
 using Xunit;
 
@@ -24,7 +23,7 @@ namespace Microsoft.Azure.WebJobs.Host.UnitTests.Indexers
             MethodInfo method = typeof(FunctionIndexerIntegrationTests).GetMethod(methodName, BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic);
             Assert.NotNull(method);
 
-            FunctionIndexer indexer = FunctionIndexerFactory.Create(CloudStorageAccount.DevelopmentStorageAccount,
+            FunctionIndexer indexer = FunctionIndexerFactory.Create(Storage.CloudStorageAccount.DevelopmentStorageAccount, Cosmos.Table.CloudStorageAccount.DevelopmentStorageAccount,
                 nameResolver);
 
             Tuple<FunctionDescriptor, IFunctionDefinition> indexEntry = null;

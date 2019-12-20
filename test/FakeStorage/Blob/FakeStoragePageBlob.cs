@@ -6,8 +6,10 @@ using System.Collections.Generic;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.WindowsAzure.Storage;
-using Microsoft.WindowsAzure.Storage.Blob;
+using Microsoft.Azure.Storage;
+using Microsoft.Azure.Storage.Blob;
+using Microsoft.Azure.Storage.Core.Util;
+using Microsoft.Azure.Storage.Shared.Protocol;
 
 namespace FakeStorage
 {
@@ -386,11 +388,13 @@ namespace FakeStorage
         }
 
         public override Task<CloudBlobStream> OpenWriteAsync(long? size, AccessCondition accessCondition, BlobRequestOptions options, OperationContext operationContext, CancellationToken cancellationToken)
-        {
-            CloudBlobStream stream = _store.OpenWritePage(_containerName, _blobName, size, _metadata);
-            return Task.FromResult(stream);
-            // return base.OpenWriteAsync(size, accessCondition, options, operationContext, cancellationToken);
-        }
+            => base.OpenWriteAsync(size, accessCondition, options, operationContext, cancellationToken);
+
+        public override Task<CloudBlobStream> OpenWriteAsync(long? size, CancellationToken cancellationToken) 
+            => base.OpenWriteAsync(size, cancellationToken);
+
+        public override Task<CloudBlobStream> OpenWriteAsync(long? size, PremiumPageBlobTier? premiumPageBlobTier, AccessCondition accessCondition, BlobRequestOptions options, OperationContext operationContext, CancellationToken cancellationToken)
+            => Task.FromResult(_store.OpenWritePage(_containerName, _blobName, size, _metadata));
 
         public override Task ReleaseLeaseAsync(AccessCondition accessCondition)
         {
@@ -561,10 +565,14 @@ namespace FakeStorage
             return base.StartIncrementalCopyAsync(sourceSnapshot);
         }
 
-        public override Task<string> StartIncrementalCopyAsync(Uri sourceSnapshot)
-        {
-            return base.StartIncrementalCopyAsync(sourceSnapshot);
-        }
+        public override Task<string> StartIncrementalCopyAsync(CloudPageBlob source, CancellationToken cancellationToken) 
+            => base.StartIncrementalCopyAsync(source, cancellationToken);
+
+        public override string StartIncrementalCopy(CloudPageBlob sourceSnapshot, AccessCondition destAccessCondition = null, BlobRequestOptions options = null, OperationContext operationContext = null) 
+            => base.StartIncrementalCopy(sourceSnapshot, destAccessCondition, options, operationContext);
+
+        public override string StartIncrementalCopy(Uri sourceSnapshotUri, AccessCondition destAccessCondition = null, BlobRequestOptions options = null, OperationContext operationContext = null) 
+            => base.StartIncrementalCopy(sourceSnapshotUri, destAccessCondition, options, operationContext);
 
         public override Task<string> StartIncrementalCopyAsync(CloudPageBlob sourceSnapshot, AccessCondition destAccessCondition, BlobRequestOptions options, OperationContext operationContext, CancellationToken cancellationToken)
         {
@@ -659,20 +667,23 @@ namespace FakeStorage
             // return base.UploadFromStreamAsync(source, length, premiumBlobTier, accessCondition, options, operationContext, cancellationToken);
         }
 
-        public override Task WritePagesAsync(Stream pageData, long startOffset, string contentMD5)
-        {
-            return base.WritePagesAsync(pageData, startOffset, contentMD5);
-        }
+        public override Task WritePagesAsync(Stream pageData, long startOffset, Checksum contentChecksum) 
+            => base.WritePagesAsync(pageData, startOffset, contentChecksum);
 
-        public override Task WritePagesAsync(Stream pageData, long startOffset, string contentMD5, AccessCondition accessCondition, BlobRequestOptions options, OperationContext operationContext)
-        {
-            return base.WritePagesAsync(pageData, startOffset, contentMD5, accessCondition, options, operationContext);
-        }
+        public override Task WritePagesAsync(Stream pageData, long startOffset, Checksum contentChecksum, AccessCondition accessCondition, BlobRequestOptions options, OperationContext operationContext) 
+            => base.WritePagesAsync(pageData, startOffset, contentChecksum, accessCondition, options, operationContext);
 
-        public override Task WritePagesAsync(Stream pageData, long startOffset, string contentMD5, AccessCondition accessCondition, BlobRequestOptions options, OperationContext operationContext, CancellationToken cancellationToken)
-        {
-            throw new NotImplementedException();
-            // return base.WritePagesAsync(pageData, startOffset, contentMD5, accessCondition, options, operationContext, cancellationToken);
-        }
+        public override Task WritePagesAsync(Stream pageData, long startOffset, Checksum contentChecksum, AccessCondition accessCondition, BlobRequestOptions options, OperationContext operationContext, CancellationToken cancellationToken) 
+            => throw new NotImplementedException();
+        //=> base.WritePagesAsync(pageData, startOffset, contentChecksum, accessCondition, options, operationContext, cancellationToken);
+
+        public override Task WritePagesAsync(Stream pageData, long startOffset, Checksum contentChecksum, AccessCondition accessCondition, BlobRequestOptions options, OperationContext operationContext, IProgress<StorageProgress> progressHandler, CancellationToken cancellationToken) 
+            => base.WritePagesAsync(pageData, startOffset, contentChecksum, accessCondition, options, operationContext, progressHandler, cancellationToken);
+
+        public override Task WritePagesAsync(Stream pageData, long startOffset, Checksum contentChecksum, CancellationToken cancellationToken) 
+            => base.WritePagesAsync(pageData, startOffset, contentChecksum, cancellationToken);
+
+        public override Task WritePagesAsync(Uri sourceUri, long offset, long count, long startOffset, Checksum sourceContentChecksum, AccessCondition sourceAccessCondition, AccessCondition destAccessCondition, BlobRequestOptions options, OperationContext operationContext, CancellationToken cancellationToken) 
+            => base.WritePagesAsync(sourceUri, offset, count, startOffset, sourceContentChecksum, sourceAccessCondition, destAccessCondition, options, operationContext, cancellationToken);
     }
 }

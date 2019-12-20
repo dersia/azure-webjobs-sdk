@@ -7,9 +7,9 @@ using System.IO;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
-using Microsoft.WindowsAzure.Storage;
-using Microsoft.WindowsAzure.Storage.Blob;
-using Microsoft.WindowsAzure.Storage.Queue;
+using Microsoft.Azure.Storage;
+using Microsoft.Azure.Storage.Blob;
+using Microsoft.Azure.Storage.Queue;
 
 namespace FakeStorage
 {
@@ -142,6 +142,11 @@ namespace FakeStorage
         {
             msg.SetInternalProperty(nameof(CloudQueueMessage.PopReceipt), value);
             return msg;
+        }
+
+        public static CloudQueueMessage CreateCloudQueueMessageFromByteArray(byte[] content)
+        {
+            return new CloudQueueMessage(Convert.ToBase64String(content), true);
         }
     }
 

@@ -8,8 +8,8 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Azure.WebJobs.Host.Bindings;
 using Microsoft.Azure.WebJobs.Host.Protocols;
-using Microsoft.WindowsAzure.Storage;
-using Microsoft.WindowsAzure.Storage.Table;
+using Microsoft.Azure.Storage;
+using Microsoft.Azure.Cosmos.Table;
 
 namespace Microsoft.Azure.WebJobs.Host.Tables
 {
@@ -159,18 +159,18 @@ namespace Microsoft.Azure.WebJobs.Host.Tables
 
             if (batch.Count > 0)
             {
-                StorageException exception = null;
+                Cosmos.Table.StorageException exception = null;
 
                 try
                 {
                     // Commit the batch
                     await _table.ExecuteBatchAsync(batch, cancellationToken);
                 }
-                catch (StorageException e)
+                catch (Cosmos.Table.StorageException e)
                 {
                     if (!e.IsNotFoundTableNotFound())
                     {
-                        throw new StorageException(e.GetDetailedErrorMessage(), e);
+                        throw new Cosmos.Table.StorageException(e.GetDetailedErrorMessage(), e);
                     }
 
                     exception = e;
@@ -186,9 +186,9 @@ namespace Microsoft.Azure.WebJobs.Host.Tables
                     {
                         await _table.ExecuteBatchAsync(batch, cancellationToken);
                     }
-                    catch (StorageException e)
+                    catch (Cosmos.Table.StorageException e)
                     {
-                        throw new StorageException(e.GetDetailedErrorMessage(), e);
+                        throw new Cosmos.Table.StorageException(e.GetDetailedErrorMessage(), e);
                     }
                 }
             }

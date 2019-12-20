@@ -5,8 +5,8 @@ using System;
 using System.Globalization;
 using System.Net;
 using System.Threading.Tasks;
-using Microsoft.WindowsAzure.Storage;
-using Microsoft.WindowsAzure.Storage.Table;
+using Microsoft.Azure.Storage;
+using Microsoft.Azure.Cosmos.Table;
 
 namespace Microsoft.Azure.WebJobs.Logging
 {
@@ -78,7 +78,7 @@ namespace Microsoft.Azure.WebJobs.Logging
                 TableResult retrievedResult = await table.ExecuteAsync(retrieveOperation);
                 result = (ContainerActiveEntity)retrievedResult.Result;                
             }
-            catch (StorageException e)
+            catch (Cosmos.Table.StorageException e)
             {
                 var code = (HttpStatusCode)e.RequestInformation.HttpStatusCode;
                 if (code != HttpStatusCode.NotFound)

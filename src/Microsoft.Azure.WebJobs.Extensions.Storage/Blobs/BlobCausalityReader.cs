@@ -1,7 +1,7 @@
 ﻿// Copyright (c) .NET Foundation. All rights reserved.
 // Licensed under the MIT License. See License.txt in the project root for license information.
 
-using Microsoft.WindowsAzure.Storage.Blob;
+using Microsoft.Azure.Storage.Blob;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
@@ -16,14 +16,10 @@ namespace Microsoft.Azure.WebJobs.Host.Blobs
         {
         }
 
-        public static BlobCausalityReader Instance
-        {
-            get { return Singleton; }
-        }
+        public static BlobCausalityReader Instance 
+            => Singleton;
 
-        public Task<Guid?> GetWriterAsync(ICloudBlob blob, CancellationToken cancellationToken)
-        {
-            return BlobCausalityManager.GetWriterAsync(blob, cancellationToken);
-        }
+        public Task<Guid?> GetWriterAsync(ICloudBlob blob, CancellationToken cancellationToken) 
+            => BlobCausalityManager.GetWriterAsync(blob, cancellationToken);
     }
 }

@@ -185,7 +185,7 @@ namespace Microsoft.Azure.WebJobs.Host.UnitTests
                 var uri2 = new Uri("https://contoso.blob.core.windows.net/myContainer2?signature=foo");
                 services.AddSingleton<DistributedLockManagerContainerProvider>(new DistributedLockManagerContainerProvider()
                 {
-                    InternalContainer = new WindowsAzure.Storage.Blob.CloudBlobContainer(uri2)
+                    InternalContainer = new Azure.Storage.Blob.CloudBlobContainer(uri2)
                 });
             });
 

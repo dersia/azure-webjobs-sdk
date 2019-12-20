@@ -3,7 +3,7 @@
 
 using System;
 using System.Threading.Tasks;
-using Microsoft.WindowsAzure.Storage;
+using Microsoft.Azure.Storage;
 
 namespace Microsoft.Azure.WebJobs
 {
@@ -415,14 +415,14 @@ namespace Microsoft.Azure.WebJobs
         /// <see langword="true"/> if the exception is due to a 404 Not Found error with the error code
         /// TableNotFound; otherwise <see langword="false"/>.
         /// </returns>
-        public static bool IsNotFoundTableNotFound(this StorageException exception)
+        public static bool IsNotFoundTableNotFound(this Cosmos.Table.StorageException exception)
         {
             if (exception == null)
             {
                 throw new ArgumentNullException("exception");
             }
 
-            RequestResult result = exception.RequestInformation;
+            Cosmos.Table.RequestResult result = exception.RequestInformation;
 
             if (result == null)
             {
@@ -434,7 +434,7 @@ namespace Microsoft.Azure.WebJobs
                 return false;
             }
 
-            StorageExtendedErrorInformation extendedInformation = result.ExtendedErrorInformation;
+            Cosmos.Table.StorageExtendedErrorInformation extendedInformation = result.ExtendedErrorInformation;
 
             if (extendedInformation == null)
             {
@@ -826,12 +826,66 @@ namespace Microsoft.Azure.WebJobs
         }
 
         /// <summary>
+        /// Returns the error code from table storage exception, or null.
+        /// </summary>
+        /// <param name="exception">The storage exception.</param>
+        /// <returns>The error code, or null.</returns>
+        public static string GetErrorCode(this Cosmos.Table.StorageException exception)
+        {
+            if (exception == null)
+            {
+                throw new ArgumentNullException("exception");
+            }
+
+            Cosmos.Table.RequestResult result = exception.RequestInformation;
+
+            if (result == null)
+            {
+                return null;
+            }
+
+            Cosmos.Table.StorageExtendedErrorInformation extendedInformation = result.ExtendedErrorInformation;
+
+            if (extendedInformation == null)
+            {
+                return null;
+            }
+
+            return extendedInformation.ErrorCode;
+        }
+
+        /// <summary>
         /// Returns a custom detailed error message for a StorageException. This is a workaround for bad error messages
         /// returned by Azure Storage.
         /// </summary>
         /// <param name="exception">The storage exception.</param>
         /// <returns>The error message.</returns>
         public static string GetDetailedErrorMessage(this StorageException exception)
+        {
+            if (exception == null)
+            {
+                throw new ArgumentNullException("exception");
+            }
+
+            string message = exception.Message;
+
+            if (exception.RequestInformation != null)
+            {
+                message += $" (HTTP status code {exception.RequestInformation.HttpStatusCode.ToString()}: "
+                    + $"{exception.RequestInformation.ExtendedErrorInformation?.ErrorCode}. "
+                    + $"{exception.RequestInformation.ExtendedErrorInformation?.ErrorMessage})";
+            }
+
+            return message;
+        }
+
+        /// <summary>
+        /// Returns a custom detailed error message for a Table StorageException. This is a workaround for bad error messages
+        /// returned by Azure Storage.
+        /// </summary>
+        /// <param name="exception">The storage exception.</param>
+        /// <returns>The error message.</returns>
+        public static string GetDetailedErrorMessage(this Cosmos.Table.StorageException exception)
         {
             if (exception == null)
             {

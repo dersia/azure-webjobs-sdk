@@ -9,10 +9,10 @@ using Microsoft.Azure.WebJobs.Host.TestCommon;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.WindowsAzure.Storage;
-using Microsoft.WindowsAzure.Storage.Blob;
-using Microsoft.WindowsAzure.Storage.Queue;
-using Microsoft.WindowsAzure.Storage.Table;
+using Microsoft.Azure.Storage;
+using Microsoft.Azure.Storage.Blob;
+using Microsoft.Azure.Storage.Queue;
+using Microsoft.Azure.Cosmos.Table;
 using Newtonsoft.Json.Linq;
 using Xunit;
 
@@ -27,8 +27,10 @@ namespace Microsoft.Azure.WebJobs.Host.EndToEndTests
         private const string OutputTableName = TestArtifactPrefix + "tableinput%rnd%";
         private const string TestData = "TestData";
         private const string Secondary = "SecondaryStorage";
-        private static CloudStorageAccount primaryAccountResult;
-        private static CloudStorageAccount secondaryAccountResult;
+        private static Storage.CloudStorageAccount primaryAccountResult;
+        private static Storage.CloudStorageAccount secondaryAccountResult;
+        private static Cosmos.Table.CloudStorageAccount primaryTableAccountResult;
+        private static Cosmos.Table.CloudStorageAccount secondaryTableAccountResult;
         private readonly TestFixture _fixture;
 
         public MultipleStorageAccountsEndToEndTests(TestFixture fixture)
@@ -163,6 +165,16 @@ namespace Microsoft.Azure.WebJobs.Host.EndToEndTests
             Assert.Equal(_fixture.Account2.SdkObject.Credentials.AccountName, secondaryAccountResult.Credentials.AccountName);
         }
 
+        [Fact]
+        public async Task CloudTableStorageAccount_PrimaryAndSecondary_Succeeds()
+        {
+            await _fixture.JobHost.CallAsync(typeof(MultipleStorageAccountsEndToEndTests).GetMethod(nameof(MultipleStorageAccountsEndToEndTests.BindToCloudTableStorageAccount)));
+
+            Assert.Equal(_fixture.Account1.SdkTableObject.Credentials.AccountName, primaryTableAccountResult.Credentials.AccountName);
+            Assert.Equal(_fixture.Account2.SdkTableObject.Credentials.AccountName, secondaryTableAccountResult.Credentials.AccountName);
+        }
+        
+
         public static void BlobToBlob_DifferentAccounts_PrimaryToSecondary(
             [BlobTrigger(Input + "/{name}")] string input,
             [Blob(Output + "/{name}", Connection = Secondary)] out string output)
@@ -225,11 +237,20 @@ namespace Microsoft.Azure.WebJobs.Host.EndToEndTests
 
         [NoAutomaticTrigger]
         public static void BindToCloudStorageAccount(
-            CloudStorageAccount primary,
-            [StorageAccount(Secondary)] CloudStorageAccount secondary)
+            Storage.CloudStorageAccount primary,
+            [StorageAccount(Secondary)] Storage.CloudStorageAccount secondary)
         {
             primaryAccountResult = primary;
             secondaryAccountResult = secondary;
+        }
+
+        [NoAutomaticTrigger]
+        public static void BindToCloudTableStorageAccount(
+            Cosmos.Table.CloudStorageAccount primary,
+            [StorageAccount(Secondary)] Cosmos.Table.CloudStorageAccount secondary)
+        {
+            primaryTableAccountResult = primary;
+            secondaryTableAccountResult = secondary;
         }
 
         private class TestNameResolver : RandomNameResolver

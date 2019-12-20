@@ -1,9 +1,9 @@
 ﻿// Copyright (c) .NET Foundation. All rights reserved.
 // Licensed under the MIT License. See License.txt in the project root for license information.
 
-using Microsoft.WindowsAzure.Storage;
-using Microsoft.WindowsAzure.Storage.Queue;
-using Microsoft.WindowsAzure.Storage.Queue.Protocol;
+using Microsoft.Azure.Storage;
+using Microsoft.Azure.Storage.Queue;
+using Microsoft.Azure.Storage.Queue.Protocol;
 using System;
 using System.Linq;
 using System.Collections.Generic;
@@ -55,7 +55,20 @@ namespace FakeStorage
             }
 
             _store.AddMessage(this.Name, message);
-            return Task.FromResult(0);
+            return Task.CompletedTask;
+        }
+
+        public override Task AddMessageAsync(CloudQueueMessage message, CancellationToken cancellationToken) 
+            => base.AddMessageAsync(message, cancellationToken);
+
+        public override void AddMessage(CloudQueueMessage message, TimeSpan? timeToLive = null, TimeSpan? initialVisibilityDelay = null, QueueRequestOptions options = null, OperationContext operationContext = null)
+        {
+            if (message == null)
+            {
+                throw new ArgumentNullException("message");
+            }
+
+            _store.AddMessage(this.Name, message);
         }
 
         public override Task ClearAsync()
@@ -166,6 +179,17 @@ namespace FakeStorage
             _store.DeleteMessage(this.Name, message);
             return Task.CompletedTask;
         }
+        public override Task DeleteMessageAsync(CloudQueueMessage message, CancellationToken cancellationToken) 
+            => base.DeleteMessageAsync(message, cancellationToken);
+
+        public override Task DeleteMessageAsync(string messageId, string popReceipt, CancellationToken cancellationToken) 
+            => base.DeleteMessageAsync(messageId, popReceipt, cancellationToken);
+
+        public override Task DeleteMessageAsync(CloudQueueMessage message, QueueRequestOptions options, OperationContext operationContext, CancellationToken cancellationToken)
+        {
+            _store.DeleteMessage(this.Name, message);
+            return Task.CompletedTask;
+        }
 
         public override Task DeleteMessageAsync(string messageId, string popReceipt)
         {
@@ -182,7 +206,7 @@ namespace FakeStorage
         public override Task DeleteMessageAsync(string messageId, string popReceipt, QueueRequestOptions options, OperationContext operationContext, CancellationToken cancellationToken)
         {
             throw new NotImplementedException();
-            // return base.DeleteMessageAsync(messageId, popReceipt, options, operationContext, cancellationToken);
+            //return base.DeleteMessageAsync(messageId, popReceipt, options, operationContext, cancellationToken);
         }
 
         public override bool Equals(object obj)
